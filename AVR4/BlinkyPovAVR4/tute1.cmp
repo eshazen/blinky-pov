@@ -1,0 +1,164 @@
+Cmp-Mod V01 Created by CvPcb (2012-oct-18)-testing date = Tue 13 Nov 2012 09:23:19 AM EST
+
+BeginCmp
+TimeStamp = /508141DF;
+Reference = BT1;
+ValeurCmp = 2xAA;
+IdModule  = 2PIN_battery_new2;
+EndCmp
+
+BeginCmp
+TimeStamp = /50813D30;
+Reference = C1;
+ValeurCmp = 0.1uF;
+IdModule  = C2;
+EndCmp
+
+BeginCmp
+TimeStamp = /50813691;
+Reference = D1;
+ValeurCmp = LED;
+IdModule  = LED-5MM-FIX;
+EndCmp
+
+BeginCmp
+TimeStamp = /5081392B;
+Reference = D2;
+ValeurCmp = LED;
+IdModule  = LED-5MM-FIX;
+EndCmp
+
+BeginCmp
+TimeStamp = /50813937;
+Reference = D3;
+ValeurCmp = LED;
+IdModule  = LED-5MM-FIX;
+EndCmp
+
+BeginCmp
+TimeStamp = /5081393D;
+Reference = D4;
+ValeurCmp = LED;
+IdModule  = LED-5MM-FIX;
+EndCmp
+
+BeginCmp
+TimeStamp = /50813956;
+Reference = D5;
+ValeurCmp = LED;
+IdModule  = LED-5MM-FIX;
+EndCmp
+
+BeginCmp
+TimeStamp = /5081395C;
+Reference = D6;
+ValeurCmp = LED;
+IdModule  = LED-5MM-FIX;
+EndCmp
+
+BeginCmp
+TimeStamp = /50813962;
+Reference = D7;
+ValeurCmp = LED;
+IdModule  = LED-5MM-FIX;
+EndCmp
+
+BeginCmp
+TimeStamp = /50813968;
+Reference = D8;
+ValeurCmp = LED;
+IdModule  = LED-5MM-FIX;
+EndCmp
+
+BeginCmp
+TimeStamp = /50813D9E;
+Reference = D9;
+ValeurCmp = PD;
+IdModule  = LED-3MM-FIX;
+EndCmp
+
+BeginCmp
+TimeStamp = /50813DAE;
+Reference = D10;
+ValeurCmp = PD;
+IdModule  = LED-3MM-FIX;
+EndCmp
+
+BeginCmp
+TimeStamp = /508135AE;
+Reference = IC1;
+ValeurCmp = ATTINY44A-P;
+IdModule  = DIP-14__300;
+EndCmp
+
+BeginCmp
+TimeStamp = /50A2565E;
+Reference = P1;
+ValeurCmp = CONN_1;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /50A25798;
+Reference = P2;
+ValeurCmp = CONN_1;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /50A25658;
+Reference = P3;
+ValeurCmp = CONN_1;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /50A2563F;
+Reference = P4;
+ValeurCmp = CONN_1;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /50A257A0;
+Reference = P5;
+ValeurCmp = CONN_1;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /50A257A6;
+Reference = P6;
+ValeurCmp = CONN_1;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /50813641;
+Reference = R1;
+ValeurCmp = 10k;
+IdModule  = R3-5;
+EndCmp
+
+BeginCmp
+TimeStamp = /50813DC3;
+Reference = R2;
+ValeurCmp = 10k;
+IdModule  = R3-5;
+EndCmp
+
+BeginCmp
+TimeStamp = /509C5B8A;
+Reference = R3;
+ValeurCmp = 10k;
+IdModule  = R3-5;
+EndCmp
+
+BeginCmp
+TimeStamp = /5081403D;
+Reference = SW1;
+ValeurCmp = SW_PUSH;
+IdModule  = BTN-B3F-1000;
+EndCmp
+
+EndListe

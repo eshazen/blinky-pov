@@ -1,0 +1,270 @@
+<!-- programming for blinky -->
+<!-- progress bar disabled as it somehow interferes with timing -->
+
+<html>
+<head>
+<style>
+body
+{
+  background-color: black;
+  color: white;
+}
+</style>
+</head>
+
+<body>
+<script>
+// global vars
+var transmitting = 0;    // 1 when we are currently transmitting, so don't let the user update anything
+var length = 0;
+var delay = 10;
+var current_clock = 0;
+// These two arrays store our data to transmit, in two different forms:
+// an array of byte values to transmit, including the message wrapper data
+// (this is exactly what we want to be in eeprom)
+var message_data;   
+// An array of byte values that should be transmitted via blinky protocol.
+// It is message_data after it has been partitioned and checksummed into our
+// intel-hex-like wrapper format.
+var xmit_data;      
+// an array of 0/1 values, generated from xmit_data
+var xmit_raw;       
+var progress_max_width = 301;
+
+
+
+
+// takes data from message_data and wraps it up into 16-byte chunks with a
+// record type, address, data length, and checksum
+// stores output in the xmit_data array
+// it's similar to the intel hex file format, except without hex-ascii encoding the data first
+// (transmit raw binary values)
+
+function wrap_messages()
+{
+    // we reverse the message_data array so we can just pop things off the end
+    message_data.reverse();
+
+    xmit_data = Array();
+    var addr_hi = 0;
+    var addr_lo = 0;
+    var record_type = 6;
+    while (message_data.length > 0)
+    {
+        var num_bytes = Math.min(message_data.length, 16); // can transmit a max of 16 bytes per record
+        var checksum = 0;
+        xmit_data.push(num_bytes);      checksum += num_bytes;
+        xmit_data.push(addr_hi);        checksum += addr_hi;
+        xmit_data.push(addr_lo);        checksum += addr_lo;
+        xmit_data.push(record_type);    checksum += record_type;
+        for (var j = 0; j < num_bytes; j++)
+        {
+            var value = message_data.pop();
+            xmit_data.push(value);      checksum += value;
+        }
+        xmit_data.push((256 - (checksum & 255)) & 255); // checksum is whatever is needed to bring the current checksum to 0x00
+        addr_lo += num_bytes;
+    }
+
+    // add the final "please reset the device" record
+//     xmit_data.push(0x00);
+//     xmit_data.push(0x00);
+//     xmit_data.push(0x00);
+//     xmit_data.push(0x01);
+//     xmit_data.push(0xFF);
+    // add a zero 
+//    xmit_data.push(0x00);
+
+    // now, the proper byte values are stored in xmit_data
+}
+
+// converts the byte values in xmit_data into a raw binary bitstream of 0/1 values
+// stores output in the xmit_raw array
+function encode_xmit_data()
+{
+    xmit_raw = Array();
+    var str = "\"";
+    for (var i = 0; i < xmit_data.length; i++)
+    {
+        for (var j = 7; j >= 0; j--)
+        {
+            if (xmit_data[i] & (1 << j))
+            {
+                xmit_raw.push(1);
+		str += '1';
+            } else {
+                xmit_raw.push(0);
+		str += '0';
+            }
+        }
+    }
+    //    console.log("DATA: ", xmit_data);
+    //    console.log("BITS: ", xmit_raw);				     
+    console.log( str);
+}
+
+
+//
+// Add a message to the message_data array
+//
+function handle_message_text()
+{
+  var msg_delay = 7;
+  var config_byte = 0;
+  config_byte |= ((msg_delay & 0x0f) << 2);
+
+  message_data.push(1);               // only 1 message now		      
+  message_data.push( config_byte);
+  font_table = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.!&?, ";
+  var text = document.getElementById("msg_text_message").value.toUpperCase();
+  var num_chars = 0;
+  var this_data = Array();
+  for (var i = 0; i < text.length; i++)
+  {
+    var c = font_table.indexOf(text[i]);
+    if (c == -1) {
+      alert("Invalid character detected in font message '" + which + "': '" + text[i] + "'. It will be ignored.");
+    } else {
+      this_data.push(c);
+      num_chars++;
+    }
+  }
+
+  message_data.push(num_chars);
+  for (var i = 0; i < num_chars; i++)
+    message_data.push(this_data[i]);
+}
+
+
+//
+function start_dump()
+{
+  message_data = Array();
+
+  handle_message_text();
+  wrap_messages();
+  encode_xmit_data();
+
+  set_color_clock("black");
+  set_color_data("black");
+  // do the actual blinking transmission
+  transmitting = 1;
+  index = 0;
+  length = 10;
+  delay = document.getElementById("delay").value;
+  setTimeout('set_data()', delay);
+}
+function stop_dump()
+{
+  set_color_clock("black");
+  set_color_data("black");
+  transmitting = 0;
+}
+
+
+// These two functions call each other (alternating) using setTimeout().
+function set_data()
+{
+    // this function sets the color of the data panel based on the raw 0/1 values in xmit_raw (indexed by the variable 'index')
+    if ( (transmitting == 1) && (index < xmit_raw.length) ) // the stop button sets transmitting = 0.
+    {
+        if (xmit_raw[index] == 0) {
+            set_color_data("black");
+        } else {
+            set_color_data("white");
+        }
+        index++;
+
+        // overall progress
+//        var progress = index / xmit_raw.length;
+//        var seconds_remaining = Math.round(((xmit_raw.length - index) * (delay * 2)) / 1000.0);
+//        document.getElementById("progressImg").width = progress_max_width * progress;
+//        document.getElementById("progressSpan").innerHTML = Math.round(100 * progress) + "% (" + seconds_remaining + "s left)";
+
+        setTimeout('toggle_clock()', delay);
+    } else {
+        // all finished
+        set_color_clock("black");
+        set_color_data("black");
+        transmitting = 0;
+    }
+}
+
+function toggle_clock()
+{
+  // this function toggles the color of the clock panel each time it is called
+  if (current_clock == 0)
+  {
+    current_clock = 1;
+    set_color_clock("white");
+  } else {
+    current_clock = 0;
+    set_color_clock("black");
+  }
+  setTimeout('set_data()', delay);
+}
+
+// Set clock color
+function set_color_clock(c)
+{
+  e = document.getElementById("divclock");
+  e.style.backgroundColor = c;
+}
+// Set data color
+function set_color_data(c)
+{
+  e = document.getElementById("divdata");
+  e.style.backgroundColor = c;
+}
+
+</script>
+
+<h1>Blinky POV Programming</h1>
+
+<div id="msg_text" style="display: block;">
+  Message:
+  <input type="text" size="15" style="font-weight: bold; font-size: 20px;"
+  id="msg_text_message" value="Hello World" />
+  <br />
+  Available characters: 0-9, A-Z, !, ?, &amp;, \',\', and \'.\'.
+</div>
+
+<p>
+
+<div style="width: 620px;">
+    <div style="float: right; width: 301px; padding-left: 10px;">
+        <br><div style="width: 301px; height: 30px; border: 2px solid white; position: relative;">
+            <img src="progress_bar_30px_tall.png" id="progressImg" style="position: absolute; top: 0; left: 0; z-index: -1;" height="30" width="0">
+            <div style="padding: 5px;">Progress: <span id="progressSpan">Canceled</span></div>
+        </div>
+        <br>
+        <table border="0" cellpadding="2" cellspacing="2">
+        <tbody><tr><td><input onclick="javascript:start_dump();" style="height: 50px; width: 60px; font-size: 100%; font-weight: bold;" value="Go" type="button"></td><td>
+        <input onclick="javascript:stop_dump();" style="height: 50px; width: 60px; font-size: 100%; font-weight: bold;" value="Stop" type="button"></td>
+        <td>Delay (ms):<br><input size="4" id="delay" value="50" type="text"></td></tr></tbody></table>
+    </div>
+    <div style="width: 301px; background-color: white; border: 2px solid white;">
+        <div id="divdata" style="width: 150px; height: 150px; color: white; background-color: black; float: right;">Data</div>
+        <div id="divclock" style="width: 150px; height: 150px; color: white; background-color: black;">Clock</div>
+    </div>
+</div>
+
+<p>
+<b>Programming Instructions:</b>  Enter your message in the "Message" box.
+<p>
+<div style="width: 620px;">
+<ul>
+<li>Hold board up to monitor as shown, with the LEDs up.  The light sensors
+must point at the two squares marked "Clock" and "Data".
+<li>Press the white button on the board.  The top LED (D8) should
+come on and then go off.
+<li>Click the "Go" button above.  The squares will flash, and the top LED on your board
+should flash as the message is downloaded. 
+</ul>
+<p>
+<a href="prog_large.png">
+<img src="prog_sm.png"></a>
+</div>
+
+</body>
+</html>

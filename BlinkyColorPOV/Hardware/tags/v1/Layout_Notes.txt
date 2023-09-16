@@ -1,0 +1,7 @@
+
+*  Polarity mark on IC1
+*  SW2 holes too small
+*  Move P1 up a bit
+*  Fix light sensor wiring:  GND bottom, ADC to middle, now ADC is good
+*  USART works Tx and Rx
+

@@ -1,0 +1,290 @@
+# EESchema Netlist Version 1.1 created  Mon 07 Oct 2013 03:37:17 PM EDT
+(
+ ( /508135AE DIP14  IC1 ATTINY44A-P {Lib=ATTINY44A-P}
+  (    1 VCC )
+  (    2 N-000010 )
+  (    3 N-000011 )
+  (    4 N-000005 )
+  (    5 N-000001 )
+  (    6 N-000009 )
+  (    7 N-000003 )
+  (    8 N-000006 )
+  (    9 N-000007 )
+  (   10 N-000008 )
+  (   11 N-000014 )
+  (   12 N-000013 )
+  (   13 N-000012 )
+  (   14 GND )
+ )
+ ( /50813641 $noname  R1 10k {Lib=R}
+  (    1 N-000007 )
+  (    2 VCC )
+ )
+ ( /50813691 $noname  D1 LED {Lib=LED}
+  (    1 N-000012 )
+  (    2 GND )
+ )
+ ( /5081392B $noname  D2 LED {Lib=LED}
+  (    1 N-000013 )
+  (    2 GND )
+ )
+ ( /50813937 $noname  D3 LED {Lib=LED}
+  (    1 N-000014 )
+  (    2 GND )
+ )
+ ( /5081393D $noname  D4 LED {Lib=LED}
+  (    1 N-000008 )
+  (    2 GND )
+ )
+ ( /50813956 $noname  D5 LED {Lib=LED}
+  (    1 N-000009 )
+  (    2 GND )
+ )
+ ( /5081395C $noname  D6 LED {Lib=LED}
+  (    1 N-000010 )
+  (    2 GND )
+ )
+ ( /50813962 $noname  D7 LED {Lib=LED}
+  (    1 N-000011 )
+  (    2 GND )
+ )
+ ( /50813968 $noname  D8 LED {Lib=LED}
+  (    1 N-000001 )
+  (    2 GND )
+ )
+ ( /50813D30 $noname  C1 0.1uF {Lib=C}
+  (    1 VCC )
+  (    2 GND )
+ )
+ ( /50813D9E $noname  D9 PD {Lib=LED}
+  (    1 GND )
+  (    2 N-000007 )
+ )
+ ( /50813DAE $noname  D10 PD {Lib=LED}
+  (    1 GND )
+  (    2 N-000003 )
+ )
+ ( /50813DC3 $noname  R2 10k {Lib=R}
+  (    1 N-000003 )
+  (    2 VCC )
+ )
+ ( /508141DF $noname  BT1 2xAA {Lib=BATTERY}
+  (    1 VCC )
+  (    2 GND )
+ )
+ ( /509C5B8A $noname  R3 10k {Lib=R}
+  (    1 N-000005 )
+  (    2 VCC )
+ )
+ ( /50A2563F $noname  P4 CONN_1 {Lib=CONN_1}
+  (    1 N-000003 )
+ )
+ ( /50A25658 $noname  P3 CONN_1 {Lib=CONN_1}
+  (    1 N-000006 )
+ )
+ ( /50A2565E $noname  P1 CONN_1 {Lib=CONN_1}
+  (    1 N-000007 )
+ )
+ ( /50A25798 $noname  P2 CONN_1 {Lib=CONN_1}
+  (    1 N-000005 )
+ )
+ ( /50A257A0 $noname  P5 CONN_1 {Lib=CONN_1}
+  (    1 VCC )
+ )
+ ( /50A257A6 $noname  P6 CONN_1 {Lib=CONN_1}
+  (    1 GND )
+ )
+ ( /5081403D $noname  SW1 SW_PUSH {Lib=SW_PUSH}
+  (    1 N-000006 )
+  (    2 GND )
+ )
+)
+*
+{ Allowed footprints by component:
+$component R1
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component D1
+ LED-3MM
+ LED-5MM
+ LED-10MM
+ LED-0603
+ LED-0805
+ LED-1206
+ LEDV
+$endlist
+$component D2
+ LED-3MM
+ LED-5MM
+ LED-10MM
+ LED-0603
+ LED-0805
+ LED-1206
+ LEDV
+$endlist
+$component D3
+ LED-3MM
+ LED-5MM
+ LED-10MM
+ LED-0603
+ LED-0805
+ LED-1206
+ LEDV
+$endlist
+$component D4
+ LED-3MM
+ LED-5MM
+ LED-10MM
+ LED-0603
+ LED-0805
+ LED-1206
+ LEDV
+$endlist
+$component D5
+ LED-3MM
+ LED-5MM
+ LED-10MM
+ LED-0603
+ LED-0805
+ LED-1206
+ LEDV
+$endlist
+$component D6
+ LED-3MM
+ LED-5MM
+ LED-10MM
+ LED-0603
+ LED-0805
+ LED-1206
+ LEDV
+$endlist
+$component D7
+ LED-3MM
+ LED-5MM
+ LED-10MM
+ LED-0603
+ LED-0805
+ LED-1206
+ LEDV
+$endlist
+$component D8
+ LED-3MM
+ LED-5MM
+ LED-10MM
+ LED-0603
+ LED-0805
+ LED-1206
+ LEDV
+$endlist
+$component C1
+ SM*
+ C?
+ C1-1
+$endlist
+$component D9
+ LED-3MM
+ LED-5MM
+ LED-10MM
+ LED-0603
+ LED-0805
+ LED-1206
+ LEDV
+$endlist
+$component D10
+ LED-3MM
+ LED-5MM
+ LED-10MM
+ LED-0603
+ LED-0805
+ LED-1206
+ LEDV
+$endlist
+$component R2
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component R3
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$endfootprintlist
+}
+{ Pin List by Nets
+Net 1 "" ""
+ IC1 5
+ D8 1
+Net 2 "VCC" "VCC"
+ R2 2
+ R3 2
+ R1 2
+ P5 1
+ IC1 1
+ C1 1
+ BT1 1
+Net 3 "" ""
+ P4 1
+ R2 1
+ D10 2
+ IC1 7
+Net 4 "GND" "GND"
+ D8 2
+ D2 2
+ D6 2
+ D5 2
+ D4 2
+ D3 2
+ D7 2
+ C1 2
+ D1 2
+ IC1 14
+ D10 1
+ SW1 2
+ P6 1
+ D9 1
+ BT1 2
+Net 5 "" ""
+ R3 1
+ P2 1
+ IC1 4
+Net 6 "" ""
+ P3 1
+ IC1 8
+ SW1 1
+Net 7 "" ""
+ P1 1
+ D9 2
+ IC1 9
+ R1 1
+Net 8 "" ""
+ D4 1
+ IC1 10
+Net 9 "" ""
+ IC1 6
+ D5 1
+Net 10 "" ""
+ D6 1
+ IC1 2
+Net 11 "" ""
+ IC1 3
+ D7 1
+Net 12 "" ""
+ D1 1
+ IC1 13
+Net 13 "" ""
+ D2 1
+ IC1 12
+Net 14 "" ""
+ D3 1
+ IC1 11
+}
+#End

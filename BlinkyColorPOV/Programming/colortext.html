@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+
+<!-- Color Blinky POV programmer
+     Supports multi-color text
+     download protocol, sent as 9-bit binary values
+        0x2aa
+	<speed>           (currently not used)
+        <nchars>          (character count)
+        <code> <code>..   (low 6 bits are character code, upper 3 are color)
+        <checksum>
+    -->
+
+<html>
+<body>
+
+<h2>BlinkyColorPOV Programmer</h2>
+
+<p>
+<table>
+<tr><td>Select a color: &nbsp;
+<td><canvas id="myPallette" width="160" height="30" style="border:1px solid #e0e0e0;"></canvas>
+<td>&nbsp; Current:
+<td><canvas id="myBrush" width="20" height="30" style="border:1px solid #e0e0e0;"></canvas>
+<td>(Change text color by selecting a new color and
+clicking on the letter whose color you wish to change)
+</table>
+<p>
+Enter text in the box below then press Enter button
+<p>
+<input type"text" id="textIn" value="Hello!" size="12" /> <button type="button" id="butText">Enter</button>
+&nbsp; &nbsp; Download delay: <input type="text" id="textDelay" value="50" size="5" />
+&nbsp; &nbsp;
+<font color="808080">debug: <input type="text" id="pixelDelay" value="4" size="5" /> </font>
+<p>
+<canvas id="myCanvas" width="30" height="15" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<br />
+<button type="button" id="butClear">Erase</button>
+<p>
+<p>
+<button type="button" id="butLoad">Download</button>
+<button type="button" id="butStop">Stop</button>
+<p>
+
+<p>
+<canvas id="myClock" width="120" height="120" style="border:1px solid #e0e0e0;"></canvas>
+<canvas id="myData" width="120" height="120" style="border:1px solid #e0e0e0;"></canvas>
+
+<br />
+<table width=100%>
+<tr>
+<td width="30%">
+<img src="download.jpg" width=250>
+<td>
+Hold your blinky device so that the light sensors point at the two black squares below.
+<br>Press the button on your device, the first light should turn blue
+<br>Then presss the "Download" button and <em>hold still</em> until the blinking stops.
+<p>Notes:  The first LED should blink during download.
+  <br>At the end it should turn green.  If it turns red, try again
+  <br>If it fails every time, change the "Download delay" above from 50 to a larger value (try 75)
+
+
+</table>
+
+
+<input type"text" size=100 id="textDebug" />
+
+<script>
+
+//
+//--- variables
+//
+var g_pixHgt = 25;		// height of one pixel
+var g_pixWid = 20;		// width of one pixel
+var g_verPix = 8;		// height of drawing area in pixels
+var g_horPix = 48;		// width of drawing area in pixels
+var g_botMarg = g_pixHgt;	// bottom margin height
+
+var g_palWid = 20;
+var g_numPal = 8;
+var g_palHgt = 30;
+
+var g_curColor = 1;
+
+var current_clock = 0;
+
+// current text, starting positions, colors
+var g_TextChars = "";
+var g_TextPosns = new Array();
+var g_TextColrs = new Array();
+
+//
+//--- 5x8 font
+// extracted from 5x8-ISO8859-1.pcf.gz
+//
+var font_lo = 32;
+var font_hi = 96;
+var font_hgt = 8;
+var font = [
+  0,
+  1,0x7a,  // char: !
+  3,0x70,0x00,0x70,  // char: quote
+  5,0x28,0xfe,0x28,0xfe,0x28,  // char: #
+  5,0x20,0x54,0xfe,0x54,0x08,  // char: $
+  3,0x68,0x10,0x2c,  // char: %
+  4,0x6c,0x92,0x6c,0x02,  // char: &
+  1,0x70,  // char: '
+  2,0x3c,0x42,  // char: (
+  2,0x42,0x3c,  // char: )
+  4,0x2a,0x1c,0x1c,0x2a,  // char: *
+  5,0x08,0x08,0x3e,0x08,0x08,  // char: +
+  3,0x01,0x06,0x04,  // char: ,
+  4,0x08,0x08,0x08,0x08,  // char: -
+  3,0x02,0x07,0x02,  // char: .
+  4,0x06,0x08,0x10,0x60,  // char: /
+  3,0x3c,0x42,0x3c,  // char: 0
+  3,0x22,0x7e,0x02,  // char: 1
+  4,0x26,0x4a,0x4a,0x32,  // char: 2
+  4,0x44,0x52,0x72,0x4c,  // char: 3
+  4,0x18,0x28,0x7e,0x08,  // char: 4
+  4,0x74,0x52,0x52,0x4c,  // char: 5
+  4,0x3c,0x52,0x52,0x0c,  // char: 6
+  4,0x40,0x46,0x58,0x60,  // char: 7
+  4,0x2c,0x52,0x52,0x2c,  // char: 8
+  4,0x30,0x4a,0x4a,0x3c,  // char: 9
+  2,0x36,0x36,  // char: :
+  3,0x01,0x36,0x34,  // char: ;
+  3,0x18,0x24,0x42,  // char: <
+  4,0x14,0x14,0x14,0x14,  // char: =
+  3,0x42,0x24,0x18,  // char: >
+  3,0x20,0x4a,0x30,  // char: ?
+  5,0x3c,0x42,0x99,0xa5,0x78,  // char: @
+  4,0x3e,0x48,0x48,0x3e,  // char: A
+  4,0x7e,0x52,0x52,0x2c,  // char: B
+  4,0x3c,0x42,0x42,0x24,  // char: C
+  4,0x7e,0x42,0x42,0x3c,  // char: D
+  4,0x7e,0x52,0x52,0x42,  // char: E
+  4,0x7e,0x50,0x50,0x40,  // char: F
+  4,0x3c,0x42,0x4a,0x2c,  // char: G
+  4,0x7e,0x10,0x10,0x7e,  // char: H
+  3,0x42,0x7e,0x42,  // char: I
+  4,0x04,0x42,0x7c,0x40,  // char: J
+  4,0x7e,0x10,0x2c,0x42,  // char: K
+  4,0x7e,0x02,0x02,0x02,  // char: L
+  4,0x7e,0x30,0x30,0x7e,  // char: M
+  4,0x7e,0x30,0x1c,0x7e,  // char: N
+  4,0x3c,0x42,0x42,0x3c,  // char: O
+  4,0x7e,0x48,0x48,0x30,  // char: P
+  4,0x3c,0x4a,0x46,0x3d,  // char: Q
+  4,0x7e,0x48,0x48,0x36,  // char: R
+  4,0x24,0x52,0x4a,0x24,  // char: S
+  3,0x40,0x7e,0x40,  // char: T
+  4,0x7c,0x02,0x02,0x7c,  // char: U
+  4,0x78,0x06,0x06,0x78,  // char: V
+  4,0x7e,0x0c,0x0c,0x7e,  // char: W
+  4,0x66,0x18,0x18,0x66,  // char: X
+  5,0x60,0x10,0x0e,0x10,0x60,  // char: Y
+  4,0x46,0x4a,0x52,0x62,  // char: Z
+  3,0x7e,0x42,0x42,  // char: [
+  4,0x60,0x10,0x08,0x06,  // char: \
+  3,0x42,0x42,0x7e,  // char: ]
+  3,0x20,0x40,0x20,  // char: ^
+  4,0x01,0x01,0x01,0x01,  // char: _
+  2,0x40,0x20  // char: `
+];
+
+//
+//--- get DOM elements
+//
+var g_Canvas = document.getElementById("myCanvas");
+var g_CanvasContext = g_Canvas.getContext("2d");
+var g_Pallette = document.getElementById("myPallette");
+var g_Brush = document.getElementById("myBrush");
+var g_PalContext = g_Pallette.getContext("2d");
+var g_BrushContext = g_Brush.getContext("2d");
+var g_ClearButton = document.getElementById("butClear");
+var g_TextButton = document.getElementById("butText");
+var g_TextInput = document.getElementById("textIn");
+var g_LoadButton = document.getElementById("butLoad");
+var g_StopButton = document.getElementById("butStop");
+var g_clock = document.getElementById("myClock");
+var g_data = document.getElementById("myData");
+var g_debug = document.getElementById("textDebug");
+
+//--- resize the canvas
+g_Canvas.width = g_pixWid*g_horPix;
+g_Canvas.height = g_pixHgt*g_verPix+g_botMarg;
+
+g_CanvasContext.lineWidth=1;
+
+//--- resize the color pallette
+g_Pallette.width = g_palWid * g_numPal;
+g_Pallette.height = g_palHgt;
+
+//--- add callbacks
+
+g_Canvas.addEventListener('click', canvasClick, false);
+g_Pallette.addEventListener('click', palClick, false);
+g_ClearButton.addEventListener('click', eraClick, false);
+g_TextButton.addEventListener('click', txtClick, false);
+g_LoadButton.addEventListener('click', loadClick, false);
+g_StopButton.addEventListener('click', stop_dump, false);
+
+//--- initialize
+eraseAll();
+
+
+function eraseAll() {
+  g_TextChars = [ ];
+  g_CanvasContext.fillStyle = '#000000';
+  g_CanvasContext.fillRect( 0, 0, g_pixWid*g_horPix, g_pixHgt*g_verPix);
+  drawGrid();
+  g_curColor = 1;
+  g_TextChars = "";
+  set_color_clock("black");
+  set_color_data("black");
+}
+
+function drawGrid() {
+  //--- draw grid ---
+  g_CanvasContext.strokeStyle = '#808080';
+  
+  var x;
+  for( x=0; x<g_horPix; x++) {
+    g_CanvasContext.beginPath();
+    g_CanvasContext.moveTo( x*g_pixWid, 0);
+    g_CanvasContext.lineTo( x*g_pixWid, g_pixHgt*g_verPix+g_botMarg);
+    g_CanvasContext.stroke();
+  }
+  var y;
+  for( y=0; y<g_verPix; y++) {
+    g_CanvasContext.beginPath();
+    g_CanvasContext.moveTo( 0, y*g_pixHgt);
+    g_CanvasContext.lineTo( g_pixWid*g_horPix-1, y*g_pixHgt);
+    g_CanvasContext.stroke();
+  }		    
+}
+
+//--- draw palette
+var colrz = [ '#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00',
+	      '#00ffff', '#ff00ff', '#ffffff' ];
+
+for( x=0; x<g_numPal; x++) {
+  g_PalContext.fillStyle = colrz[x];
+  g_PalContext.fillRect( x*g_palWid, 0, g_palWid, g_palHgt);
+}		    
+
+// get the position within the canvas, convert to pixels
+function getCursorPosition(canvas, event) {
+    var rect = canvas.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+    return [ Math.floor(x/g_pixWid), Math.floor(y/g_pixHgt)];
+}
+
+
+function getFontData( ch) {
+  var i;
+  var ich = ch - font_lo;
+  var j;
+		      
+  if( ch < font_lo || ch > font_hi) {
+    return [0];
+  }
+
+  idx = 0;
+  if( ich > 0) {
+    for( i=0; i < ich; i++) {
+      idx = idx + font[idx]+1;
+    }
+  }
+  var data = [ ];
+  if( font[idx] != 0) {
+    for( var i=0; i < font[idx]; i++) {
+      data.push( font[i+idx+1]);		      
+    }
+  }
+
+  return data;
+}
+
+
+var xdata;
+var xraw;
+
+var code_len = 10;
+
+function loadClick(event) {
+  // convert characters to 9-bit code with low 6 bits = char,
+  // upper 3 bits = color
+  var n = g_TextChars.length;
+  var speed = parseInt( document.getElementById( "pixelDelay").value);
+  var checksum = 0x2aa + speed;
+  xdata = Array();
+  xraw = Array();
+  xdata.push( 0x2aa);		// synchronization patterns
+  xdata.push( speed);
+  xdata.push( n);  checksum += n;		// number of bytes first on message
+  if( n) {
+    for( var i=0; i<n; i++) {
+      var ch = g_TextChars.charCodeAt(i) - font_lo;
+      var c = g_TextColrs[i];
+      var code = ch | (c<<6);
+      xdata.push( code);
+      checksum += code;
+    }
+  }
+  xdata.push( checksum & ((1<<code_len)-1));
+
+  var str = "";
+  var sbin = "";
+
+  for (var i = 0; i < xdata.length; i++) {
+    str += " 0x" + xdata[i].toString(16);
+    var b = (1 << (code_len-1))
+    for( var j=0; j<code_len; j++) {
+      if (xdata[i] & b) {
+        xraw.push(1);
+	sbin += '1';
+      } else {
+        xraw.push(0)
+	sbin += '0';;
+      }
+      b >>= 1;
+    }
+    sbin += ' ';
+  }
+
+  console.log(sbin);
+
+  g_debug.value = str;
+  set_color_clock("black");
+  set_color_data("black");
+  current_clock = 0;
+  // do the actual blinking transmission
+  transmitting = 1;
+  index = 0;
+  delay = document.getElementById( "textDelay").value;
+  setTimeout('set_data()', delay);
+}
+
+function stop_dump()
+{
+  set_color_clock("black");
+  set_color_data("black");
+  transmitting = 0;
+}
+
+
+function rgbToHex(r, g, b) {
+    if (r > 255 || g > 255 || b > 255)
+        throw "Invalid color component";
+    return ((r << 16) | (g << 8) | b).toString(16);
+}
+
+
+// replace stored text with input text
+// refresh display
+function txtClick(event) {
+  txt = g_TextInput.value.toUpperCase();
+  g_TextChars = txt;
+  var x = 0;
+  for( var i=0; i < txt.length; i++) {
+    g_TextPosns[i] = x;
+    x += getFontData(txt.charCodeAt(i)).length + 1;
+    g_TextColrs[i] = g_curColor;
+  }
+  g_TextPosns[ txt.length] = x;  // remember position past last char
+  refreshText();
+}
+
+function refreshText() {
+  var posX = 0;
+  var txt = g_TextChars;
+  for( var i=0; i<txt.length; i++) {
+    g_CanvasContext.fillStyle = colrz[ g_TextColrs[i]];
+    var chr = txt.charCodeAt(i);
+    var data = getFontData( chr);
+    var dataLen = data.length;
+    for( var col=0; col<dataLen; col++) {
+      var fv = data[col];
+      for( var row=0; row<font_hgt; row++) {
+        if( fv & (0x80>>row) ) {
+          var x = posX + col;
+          var y = row;			      
+          g_CanvasContext.fillRect( x*g_pixWid, y*g_pixHgt, g_pixWid, g_pixHgt);
+        }        
+      }				  
+    }
+    posX = posX + dataLen + 1;
+  }
+}
+
+function palClick(event) { 
+  var rect = g_Pallette.getBoundingClientRect();
+  var x = event.clientX - rect.left;
+  var y = event.clientY - rect.top;
+  g_curColor = Math.floor(x/g_palWid);
+  g_BrushContext.fillStyle = colrz[g_curColor];
+  g_BrushContext.fillRect( 0, 0, g_palWid, g_palHgt);
+  refreshText();
+}
+
+function eraClick( e) {
+  eraseAll();
+}
+
+// if clicked on a letter, change it's color
+function canvasClick(e) {
+  var p = getCursorPosition( g_Canvas, e);
+  var x = p[0];
+  for( var i=0; i<g_TextChars.length; i++) {
+    if( x >= g_TextPosns[i] && x < g_TextPosns[i+1]) {
+      g_TextColrs[i] = g_curColor;
+    }
+  }
+  refreshText();
+}
+
+
+function getBox( px, py) {
+  var ix = Math.floor(px * g_pixWid + g_pixWid/2);
+  var iy = Math.floor(py * g_pixHgt + g_pixHgt/2);
+  rgba = g_CanvasContext.getImageData( ix, iy, 1, 1).data;
+  return[ rgba[0], rgba[1], rgba[2]];
+}
+
+
+
+// These two functions call each other (alternating) using setTimeout().
+function set_data()
+{
+    if ( (transmitting == 1) && (index < xraw.length) ) // the stop button sets transmitting = 0.
+    {
+        if (xraw[index] == 0) {
+            set_color_data("black");
+        } else {
+            set_color_data("white");
+        }
+        index++;
+        setTimeout('toggle_clock()', delay);
+    } else {
+        // all finished
+        set_color_clock("black");
+        set_color_data("black");
+        transmitting = 0;
+    }
+}
+
+function toggle_clock()
+{
+  // this function toggles the color of the clock panel each time it is called
+  if (current_clock == 0)
+  {
+    current_clock = 1;
+    set_color_clock("white");
+  } else {
+    current_clock = 0;
+    set_color_clock("black");
+  }
+  setTimeout('set_data()', delay);
+}
+
+// Set clock color
+function set_color_clock(c)
+{
+  g_clock.style.backgroundColor = c;
+}
+// Set data color
+function set_color_data(c)
+{
+  g_data.style.backgroundColor = c;
+}
+
+
+
+</script>
+
+</body>
+</html>

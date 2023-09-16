@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<!-- Simple R/G/B pixel editor for BlinkyColorPOV -->
+
+<html>
+<body>
+
+<h2>BlinkyColorPOV Programmer</h2>
+
+<font color="blue">
+<b>Pick a color, then draw a design or message</b></font>
+<p>
+
+<canvas id="myCanvas" width="30" height="15" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<br />
+<canvas id="myPallette" width="160" height="30" style="border:1px solid #e0e0e0;"></canvas>
+<br />
+<button type="button" id="butClear">Erase</button>
+<p>
+If you like, select a color, then enter text below
+<br />
+<input type"text" id="textIn" /> <button type="button" id="butText">Enter</button>
+<p>
+<button type="button" id="butLoad">Download</button>
+
+
+<script>
+
+//
+//--- variables
+//
+var g_pixHgt = 25;
+var g_pixWid = 20;
+var g_verPix = 8;
+var g_horPix = 48;
+
+var g_palWid = 20;
+var g_numPal = 8;
+var g_palHgt = 30;
+
+var g_Down = false;
+var g_xx = -1;
+var g_yy = -1;
+
+var g_fillColor = '#ffffff';
+
+//
+//--- 5x8 font
+// extracted from 5x8-ISO8859-1.pcf.gz
+//
+var font_lo = 32;
+var font_hi = 96;
+var font_hgt = 8;
+var font = [
+  0,
+  1,0x7a,  // char: !
+  3,0x70,0x00,0x70,  // char: quote
+  5,0x28,0xfe,0x28,0xfe,0x28,  // char: #
+  5,0x20,0x54,0xfe,0x54,0x08,  // char: $
+  3,0x68,0x10,0x2c,  // char: %
+  4,0x6c,0x92,0x6c,0x02,  // char: &
+  1,0x70,  // char: '
+  2,0x3c,0x42,  // char: (
+  2,0x42,0x3c,  // char: )
+  4,0x2a,0x1c,0x1c,0x2a,  // char: *
+  5,0x08,0x08,0x3e,0x08,0x08,  // char: +
+  3,0x01,0x06,0x04,  // char: ,
+  4,0x08,0x08,0x08,0x08,  // char: -
+  3,0x02,0x07,0x02,  // char: .
+  4,0x06,0x08,0x10,0x60,  // char: /
+  3,0x3c,0x42,0x3c,  // char: 0
+  3,0x22,0x7e,0x02,  // char: 1
+  4,0x26,0x4a,0x4a,0x32,  // char: 2
+  4,0x44,0x52,0x72,0x4c,  // char: 3
+  4,0x18,0x28,0x7e,0x08,  // char: 4
+  4,0x74,0x52,0x52,0x4c,  // char: 5
+  4,0x3c,0x52,0x52,0x0c,  // char: 6
+  4,0x40,0x46,0x58,0x60,  // char: 7
+  4,0x2c,0x52,0x52,0x2c,  // char: 8
+  4,0x30,0x4a,0x4a,0x3c,  // char: 9
+  2,0x36,0x36,  // char: :
+  3,0x01,0x36,0x34,  // char: ;
+  3,0x18,0x24,0x42,  // char: <
+  4,0x14,0x14,0x14,0x14,  // char: =
+  3,0x42,0x24,0x18,  // char: >
+  3,0x20,0x4a,0x30,  // char: ?
+  5,0x3c,0x42,0x99,0xa5,0x78,  // char: @
+  4,0x3e,0x48,0x48,0x3e,  // char: A
+  4,0x7e,0x52,0x52,0x2c,  // char: B
+  4,0x3c,0x42,0x42,0x24,  // char: C
+  4,0x7e,0x42,0x42,0x3c,  // char: D
+  4,0x7e,0x52,0x52,0x42,  // char: E
+  4,0x7e,0x50,0x50,0x40,  // char: F
+  4,0x3c,0x42,0x4a,0x2c,  // char: G
+  4,0x7e,0x10,0x10,0x7e,  // char: H
+  3,0x42,0x7e,0x42,  // char: I
+  4,0x04,0x42,0x7c,0x40,  // char: J
+  4,0x7e,0x10,0x2c,0x42,  // char: K
+  4,0x7e,0x02,0x02,0x02,  // char: L
+  4,0x7e,0x30,0x30,0x7e,  // char: M
+  4,0x7e,0x30,0x1c,0x7e,  // char: N
+  4,0x3c,0x42,0x42,0x3c,  // char: O
+  4,0x7e,0x48,0x48,0x30,  // char: P
+  4,0x3c,0x4a,0x46,0x3d,  // char: Q
+  4,0x7e,0x48,0x48,0x36,  // char: R
+  4,0x24,0x52,0x4a,0x24,  // char: S
+  3,0x40,0x7e,0x40,  // char: T
+  4,0x7c,0x02,0x02,0x7c,  // char: U
+  4,0x78,0x06,0x06,0x78,  // char: V
+  4,0x7e,0x0c,0x0c,0x7e,  // char: W
+  4,0x66,0x18,0x18,0x66,  // char: X
+  5,0x60,0x10,0x0e,0x10,0x60,  // char: Y
+  4,0x46,0x4a,0x52,0x62,  // char: Z
+  3,0x7e,0x42,0x42,  // char: [
+  4,0x60,0x10,0x08,0x06,  // char: \
+  3,0x42,0x42,0x7e,  // char: ]
+  3,0x20,0x40,0x20,  // char: ^
+  4,0x01,0x01,0x01,0x01,  // char: _
+  2,0x40,0x20  // char: `
+];
+
+
+//
+//--- get DOM elements
+//
+var g_Canvas = document.getElementById("myCanvas");
+var g_CanvasContext = g_Canvas.getContext("2d");
+var g_Pallette = document.getElementById("myPallette");
+var g_PalContext = g_Pallette.getContext("2d");
+var g_ClearButton = document.getElementById("butClear");
+var g_TextButton = document.getElementById("butText");
+var g_TextInput = document.getElementById("textIn");
+var g_LoadButton = document.getElementById("butLoad");
+
+//--- resize the canvas
+g_Canvas.width = g_pixWid*g_horPix;
+g_Canvas.height = g_pixHgt*g_verPix;
+
+g_CanvasContext.lineWidth=1;
+
+//--- resize the color pallette
+g_Pallette.width = g_palWid * g_numPal;
+g_Pallette.height = g_palHgt;
+
+//--- add callbacks
+g_Canvas.addEventListener('mousedown', canvasDown, false);
+g_Canvas.addEventListener('mouseup', canvasUp, false);
+
+g_Pallette.addEventListener('click', palClick, false);
+g_ClearButton.addEventListener('click', eraClick, false);
+g_TextButton.addEventListener('click', txtClick, false);
+g_LoadButton.addEventListener('click', loadClick, false);
+
+//--- initialize
+eraseAll();
+
+
+function eraseAll() {
+  g_fillColor = '#ffffff';
+  g_CanvasContext.fillStyle = '#000000';
+  g_CanvasContext.fillRect( 0, 0, g_pixWid*g_horPix, g_pixHgt*g_verPix);
+
+  //--- draw grid ---
+  g_CanvasContext.strokeStyle = '#808080';
+  
+  var x;
+  for( x=0; x<g_horPix; x++) {
+    g_CanvasContext.moveTo( x*g_pixWid, 0);
+    g_CanvasContext.lineTo( x*g_pixWid, g_pixHgt*g_verPix-1);
+    g_CanvasContext.stroke();
+  }
+  var y;
+  for( y=0; y<g_verPix; y++) {
+    g_CanvasContext.moveTo( 0, y*g_pixHgt);
+    g_CanvasContext.lineTo( g_pixWid*g_horPix-1, y*g_pixHgt);
+    g_CanvasContext.stroke();
+  }		    
+}
+
+//--- draw palette
+var colrz = [ '#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00',
+	      '#00ffff', '#ff00ff', '#ffffff' ];
+
+for( x=0; x<g_numPal; x++) {
+  g_PalContext.fillStyle = colrz[x];
+  g_PalContext.fillRect( x*g_palWid, 0, g_palWid, g_palHgt);
+}		    
+
+
+
+function getCursorPosition(canvas, event) {
+    var rect = canvas.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+    return [ Math.floor(x/g_pixWid), Math.floor(y/g_pixHgt)];
+}
+
+
+function getFontData( ch) {
+  var i;
+  var ich = ch - font_lo;
+  var j;
+		      
+  if( ch < font_lo || ch > font_hi) {
+    return [0];
+  }
+
+  idx = 0;
+  if( ich > 0) {
+    for( i=0; i < ich; i++) {
+      idx = idx + font[idx]+1;
+    }
+  }
+  var data = [ ];
+  if( font[idx] != 0) {
+    for( var i=0; i < font[idx]; i++) {
+      data.push( font[i+idx+1]);		      
+    }
+  }
+
+  return data;
+}
+
+
+function loadClick(event) {
+  // for now just dump to console
+  console.log("width=", g_horPix, " height=", g_verPix, " colors=", g_numPal);
+  // loop over the array
+  for( var row=0; row < g_verPix; row++) {
+    for( var col=0; col < g_horPix; col++) {
+      // get pixel color as 3-element array
+      var p = getBox( col, row);
+      // convert to hex RGB from some web voodoo
+      var phex = "#" + ("000000" + rgbToHex(p[0],p[1],p[2])).slice(-6);
+      // lookup color in pallette
+      var idx = -1;
+      for( var i=0; i<colrz.length; i++) {
+        if( phex == colrz[i]) {
+          idx = i;
+          break;
+        }      
+      }      
+      // now idx is the color index 
+      if( idx != 0) {
+        console.log(" color@ (", col, ",", row, ") = ", idx);
+      }
+    }
+  }
+}
+
+function rgbToHex(r, g, b) {
+    if (r > 255 || g > 255 || b > 255)
+        throw "Invalid color component";
+    return ((r << 16) | (g << 8) | b).toString(16);
+}
+
+
+function txtClick(event) {
+  var txt = g_TextInput.value.toUpperCase();
+  var posX = 0;
+  for( var i=0; i<txt.length; i++) {
+    var chr = txt.charCodeAt(i);
+    var data = getFontData( chr);
+    var dataLen = data.length;
+    for( var col=0; col<dataLen; col++) {
+      var fv = data[col];
+      for( var row=0; row<font_hgt; row++) {
+        if( fv & (0x80>>row) ) {
+          var x = posX + col;
+          var y = row;			      
+	  g_CanvasContext.fillStyle = g_fillColor;
+          g_CanvasContext.fillRect( x*g_pixWid, y*g_pixHgt, g_pixWid, g_pixHgt);
+        }        
+      }				  
+    }
+    posX = posX + dataLen + 1;
+  }
+}
+
+function palClick(event) { 
+    var rect = g_Pallette.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+    var n = Math.floor(x/g_palWid);
+    g_fillColor = colrz[n];		    
+}
+
+function eraClick( e) {
+  eraseAll();
+}
+
+function canvasUp(e) {
+  g_Down = false;
+}		    
+
+function canvasDown(e) {
+  g_Canvas.addEventListener('mousemove', moveMouse);		    
+  var p = getCursorPosition( g_Canvas, e);
+  g_CanvasContext.fillStyle = g_fillColor;
+  g_CanvasContext.fillRect( p[0]*g_pixWid, p[1]*g_pixHgt, g_pixWid, g_pixHgt);		    
+  g_xx = p[0];
+  g_yy = p[1];		    
+  g_Down = true;		    
+}
+
+function moveMouse( e) {
+  var p = getCursorPosition( g_Canvas, e);
+  if( (g_xx != p[0] || g_yy != p[1]) && g_Down ) {		    
+    g_CanvasContext.fillStyle = g_fillColor;
+    g_CanvasContext.fillRect( p[0]*g_pixWid, p[1]*g_pixHgt, g_pixWid, g_pixHgt);		    
+    g_xx = p[0];
+    g_yy = p[1];
+  }
+}		    
+
+function getBox( px, py) {
+  var ix = Math.floor(px * g_pixWid + g_pixWid/2);
+  var iy = Math.floor(py * g_pixHgt + g_pixHgt/2);
+  rgba = g_CanvasContext.getImageData( ix, iy, 1, 1).data;
+  return[ rgba[0], rgba[1], rgba[2]];
+}
+
+// copy pixels to two-dimensional array
+var pix = new Array();
+
+function copyPixelArray() {
+  var row, col;
+  for( row=0; row<g_verPix; row++) {
+    pix[row] = new Array();
+    for( col=0; col<g_horPix; col++) {
+      var p = getBox( col, row);
+      var h = rgbToHex( p[0], p[1], p[2]);			      
+      var c = colrz.indexOf( h);
+      pix[row][col] = c;
+    }
+  }
+}
+
+function loadClick( e)
+{
+  copyPixelArray();
+  for( row=0; row<g_verPix; row++) {
+    for( col=0; col<g_horPix; col++) {
+      if( pix[row][col] != 0) {
+        console.log("(",row,",",col,")=",pix[row][col]);
+      }
+    }
+  }  
+}
+
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+
+
+</script>
+
+</body>
+</html>

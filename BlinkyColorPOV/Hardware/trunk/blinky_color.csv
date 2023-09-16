@@ -1,0 +1,31 @@
+Reference, Value, Footprint, Datasheet, CatNo
+IC1,ATMEGA328-P,Housings_DIP:DIP-28_W7.62mm_LongPads,
+D1,APA-106-F5,Connect:bornier4,,COM-12986 (pk5)
+D2,APA-106-F5,Connect:bornier4,,COM-12986 (pk5)
+D3,APA-106-F5,Connect:bornier4,,COM-12986 (pk5)
+D4,APA-106-F5,Connect:bornier4,,COM-12986 (pk5)
+D5,APA-106-F5,Connect:bornier4,,COM-12986 (pk5)
+D6,APA-106-F5,Connect:bornier4,,COM-12986 (pk5)
+D7,APA-106-F5,Connect:bornier4,,COM-12986 (pk5)
+D8,APA-106-F5,Connect:bornier4,,COM-12986 (pk5)
+U2,MMA7660FC,Housings_SSOP:MSOP-10_3x3mm_Pitch0.5mm,
+R2,4.7k,Resistors_ThroughHole:Resistor_Horizontal_RM10mm,
+R3,4.7k,Resistors_ThroughHole:Resistor_Horizontal_RM10mm,
+C4,100nF,Capacitors_ThroughHole:C_Rect_L7_W2_P5,,BC2665CT-ND
+C3,100nF,Capacitors_ThroughHole:C_Rect_L7_W2_P5,,BC2665CT-ND
+P1,CONN_02X03,Pin_Headers:Pin_Header_Straight_2x03,,609-2845-ND
+R1,10k,Resistors_ThroughHole:Resistor_Horizontal_RM10mm,
+D9,TEPT4400,Diodes_ThroughHole:Diode_P600_Vertical_AnodeUp,,751-1057-ND
+D10,TEPT4400,Diodes_ThroughHole:Diode_P600_Vertical_AnodeUp,,751-1057-ND
+R5,10k,Resistors_ThroughHole:Resistor_Horizontal_RM10mm,
+R4,10k,Resistors_ThroughHole:Resistor_Horizontal_RM10mm,
+SW2,SW_PUSH,Buttons_Switches_ThroughHole:SW_PUSH-12mm,,CKN9140-ND
+BT1,Battery,Connect:bornier2,
+SW1,SPST,Buttons_Switches_ThroughHole:SW_Micro_SPST,,CKN10397-ND
+U1,LD1117V33,TO_SOT_Packages_THT:TO-220_Neutral123_Vertical,,497-1491-5-ND
+C2,10uF,Capacitors_ThroughHole:C_Rect_L7_W2_P5,,445-8592-ND
+C1,100nF,Capacitors_ThroughHole:C_Rect_L7_W2_P5,,BC2665CT-ND
+P2,CONN_01X06,Pin_Headers:Pin_Header_Straight_1x06,,S1011EC-06-ND
+C5,1uF,Capacitors_ThroughHole:C_Rect_L7_W2_P5,,445-8591-ND
+C7,1uF,Capacitors_ThroughHole:C_Rect_L7_W2_P5,,445-8591-ND
+C8,1uF,Capacitors_ThroughHole:C_Rect_L7_W2_P5,,445-8591-ND

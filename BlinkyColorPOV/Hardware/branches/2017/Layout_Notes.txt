@@ -1,0 +1,14 @@
+
+10/24/17  Edits for 2017
+
+* Stagger pins on LEDs for easier soldering
+  with bigger pads/holes
+
+Check on below, not sure all done
+
+*  Polarity mark on IC1
+*  SW2 holes too small
+*  Move P1 up a bit
+*  Fix light sensor wiring:  GND bottom, ADC to middle, now ADC is good
+*  USART works Tx and Rx
+
